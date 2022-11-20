@@ -42,7 +42,7 @@
             <button
               class="btn btn-primary"
               @click="markContact(contact.id)"
-              :disabled="contact.marked"
+              :disabled="contact.marked === 1"
             >
               Отметить
             </button>
@@ -63,7 +63,7 @@ export default {
   name: 'FirstPage',
   data() {
     return {
-      url: 'http://localhost:5000/api/contacts/', // TODO: вынести путь в глобальную переменную. Понять как она использует правильный домен... через path?
+      url: '/api/contacts/', // TODO: вынести путь в глобальную переменную. Понять как она использует правильный домен... через path?
       form: {
         name: '',
         value: '',
@@ -109,7 +109,7 @@ export default {
         .catch((error) => {
           console.log(error)
         })
-      // this.form.name = this.form.value = '' // потом включить для очистки
+      this.form.name = this.form.value = ''
     },
     async removeContact(id) {
       await axios
@@ -124,9 +124,9 @@ export default {
     async markContact(id) {
       const contact = this.contacts.find((c) => c.id === id)
       // TODO: в данном случае так проще обновлять клиента
-      console.log(contact)
       const update = await axios.put(
-        `http://localhost:5000/api/contacts/${id}`,
+        // `http://localhost:5000/api/contacts/${id}`,
+        `${this.url}/${id}`,
         {
           ...contact,
           marked: true,
