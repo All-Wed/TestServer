@@ -8,8 +8,6 @@ import path from 'path'
 import mysql from 'mysql'
 
 // Конфигурация localhost 136.243.14.123
-let CONTACTS = []
-
 const connect = mysql.createConnection({
   host: '136.243.14.123',
   user: 'koshk402_d_koshkarev',
@@ -17,46 +15,40 @@ const connect = mysql.createConnection({
   password: 'iL6gM6mM3l',
 })
 
-async function start() {
-  console.log('3')
+async function start(sql, res) {
   connect.connect((err) => {
     if (err) {
       console.log('Error', err)
     } else {
       console.log('DB Connect')
+      getDB(sql, res)
     }
   })
 }
 
 async function getDB(sql, res) {
-  console.log('2')
-  await start()
-  console.log('4')
   connect.query(sql, function (err, results) {
-    console.log('5')
-    if (err) console.log(err)
-    console.log('results', results)
-    CONTACTS = results
-    console.log('6')
-    CONTACTS = results
-    res.status(200).json(CONTACTS)
-    // return (CONTACTS = results)
+    if (err) {
+      console.log(err)
+      connect.end()
+    } else {
+      // CONTACTS = results // тогда возвращать CONTACTS
+      res.status(200).json(results)
+      connect.end()
+    }
   })
-  console.log('7')
-  connect.end()
 }
 
 const app = express()
 app.use(express.json())
 app.use(cors())
 
+let CONTACTS = []
 // GET
 app.get('/api/contacts', (req, res) => {
-  console.log('1')
   const sql = `SELECT * FROM spisok`
-  getDB(sql, res)
-  console.log('10')
-  // res.status(200).json(CONTACTS)
+  start(sql, res)
+  // res.status(200).json(CONTACTS) // пока не могу настроить async
 })
 // POST
 app.post('/api/contacts', (req, res) => {
