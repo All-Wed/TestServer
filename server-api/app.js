@@ -14,27 +14,25 @@ const connect = mysql.createConnection({
   database: 'koshk402_allbd',
   password: 'iL6gM6mM3l',
 })
-
-async function start(sql, res) {
+// var 1
+async function connectDB(sql, res, status, message) {
   connect.connect((err) => {
-    if (err) {
-      console.log('Error', err)
-    } else {
-      console.log('DB Connect')
-      getDB(sql, res)
-    }
+    console.log('DB Connect Success')
+    workDB(sql, res, status, message)
+    // if (err) {
+    //   console.log('DB Connect Error', err)
+    // }
   })
 }
 
-async function getDB(sql, res) {
+function workDB(sql, res, status, message) {
   connect.query(sql, function (err, results) {
     if (err) {
       console.log(err)
-      connect.end()
+      // connect.end()
     } else {
-      // CONTACTS = results // тогда возвращать CONTACTS
-      res.status(200).json(results)
-      connect.end()
+      res.status(status).json({ contact: results, message: message })
+      // connect.end()
     }
   })
 }
@@ -47,34 +45,50 @@ let CONTACTS = []
 // GET
 app.get('/api/contacts', (req, res) => {
   const sql = `SELECT * FROM spisok`
-  start(sql, res)
+  const status = 200
+  const message = 'Get Contact'
+  connectDB(sql, res, status, message)
   // res.status(200).json(CONTACTS) // пока не могу настроить async
 })
 // POST
 app.post('/api/contacts', (req, res) => {
   // TODO: т.к. система id как строку почему-то, то пришлось писать Data.now()+'' чтобы не использовать v4. Как в js явно задать тип переменной. ts?
   if (req.body) {
-    const contact = { ...req.body, id: Date.now() + '', marked: false }
-    CONTACTS.push(contact)
-    res.status(201).json(CONTACTS)
+    // const VALUES = [...req.body]
+    const sql = `INSERT INTO spisok (name, value) VALUES ('${req.body.name}', '${req.body.value}')`
+    const status = 201
+    const message = 'Contact Create'
+    connectDB(sql, res, status, message)
+    // res.status(201).json(CONTACTS)
   } else {
-    console.log('POST. RESPONSE: ', req.body)
+    console.log('POST-RESPONSE: ', req.body)
     res.status(400).json(req.body)
   }
 })
 // DELETE
 app.delete(`/api/contacts/:id`, (req, res) => {
-  CONTACTS = CONTACTS.filter((c) => c.id !== req.params.id)
-  res.status(200).json({ contacts: CONTACTS, message: 'Contact Delete' })
+  const sql = `DELETE FROM spisok WHERE id = '${req.params.id}'`
+  const status = 200
+  const message = 'Contact Delete'
+  connectDB(sql, res, status, message)
+  // CONTACTS = CONTACTS.filter((c) => c.id !== req.params.id)
+  // res.status(200).json({ contacts: CONTACTS, message: 'Contact Delete' })
 })
 // PUT
 app.put('/api/contacts/:id', (req, res) => {
-  console.log('REQ', req.params)
-  console.log('REQ', req.body)
-  const idx = CONTACTS.findIndex((c) => c.id == req.params.id)
+  console.log('REQ1', req.params)
+  console.log('REQ2', req.body)
+  const sql = `UPDATE spisok SET marked = '${
+    req.body.marked * 1
+  }' WHERE id = '${req.params.id}'`
+  const status = 200
+  const message = 'Contact Marked'
+  connectDB(sql, res, status, message)
+
+  // const idx = CONTACTS.findIndex((c) => c.id == req.params.id)
   // TODO: данные приходят. id читается как строка. marked тоже? Всегда строкой? Не меняются типы? Поэтому нужно использовать не строгое сравнение? Как правильно чтобы искючить багов в будущем?
-  CONTACTS[idx] = req.body
-  res.status(200).json({ contacts: CONTACTS[idx], message: 'Contact Сhanged' })
+  // CONTACTS[idx] = req.body
+  // res.status(200).json({ contacts: CONTACTS[idx], message: 'Contact Сhanged' })
 })
 
 const PORT = 5000

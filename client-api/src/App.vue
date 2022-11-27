@@ -1,17 +1,22 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./static/logo.png" />
-    <FirstPage />
+    <Contacts />
   </div>
 </template>
 
 <script>
-import FirstPage from './components/FirstPage.vue'
+import Contacts from './components/Contacts.vue'
 
 export default {
   name: 'App',
+  data() {
+    return {
+      message: '',
+      baseURL: '',
+    }
+  },
   components: {
-    FirstPage,
+    Contacts,
   },
 }
 </script>
