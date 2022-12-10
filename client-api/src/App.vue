@@ -1,26 +1,18 @@
 <template>
   <div id="app">
-    <Contacts />
+    <Menu />
+    <router-view/>
   </div>
 </template>
 
 <script>
-import Contacts from './components/Contacts.vue'
+import Menu from './components/Menu.vue'
 
 export default {
   name: 'App',
-  data() {
-    return {
-      message: '',
-      baseURL: '',
-    }
-  },
-  components: {
-    Contacts,
-  },
+  components: { Menu }
 }
 </script>
-
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;

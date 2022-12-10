@@ -70,7 +70,7 @@ import axios from 'axios'
 import Response from './info/response.vue'
 
 export default {
-  name: 'Contacts',
+  name: 'Adress',
   data() {
     return {
       url: '/api/contacts/', // TODO: вынести путь в глобальную переменную. Понять как она использует правильный домен... через path?
@@ -87,6 +87,8 @@ export default {
     Response,
   },
   async mounted() {
+    console.log('111', axios.defaults)
+    console.log('222', process.env)
     this.getContacts()
   },
   computed: {
