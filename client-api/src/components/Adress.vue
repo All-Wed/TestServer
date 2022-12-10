@@ -40,11 +40,18 @@
             <p>id: {{ contact.id }}</p>
             <p class="card-text">{{ contact.value }}</p>
             <button
+              v-if="!contact.marked"
               class="btn btn-primary"
-              @click="markContact(contact.id)"
-              :disabled="contact.marked"
+              @click="markContact(contact)"
             >
               Отметить
+            </button>
+            <button
+              v-if="contact.marked"
+              class="btn btn-secondary"
+              @click="markContact(contact)"
+            >
+              Отменить
             </button>
             <button class="btn btn-danger" @click="removeContact(contact.id)">
               Удалить
@@ -52,27 +59,37 @@
           </div>
         </div>
       </div>
-      <p v-else>Контактов пока нет</p>
+      <p v-if="!contacts.length">Контактов пока нет</p>
+      <Response v-if="error" :message="message" />
     </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
+import Response from './info/response.vue'
+
 export default {
-  name: 'FirstPage',
+  name: 'Adress',
   data() {
     return {
-      url: 'http://localhost:5000/api/contacts/', // TODO: вынести путь в глобальную переменную. Понять как она использует правильный домен... через path?
+      url: '/api/contacts/', // TODO: вынести путь в глобальную переменную. Понять как она использует правильный домен... через path?
       form: {
         name: '',
         value: '',
       },
       contacts: [],
+      error: false,
+      message: '',
     }
   },
+  components: {
+    Response,
+  },
   async mounted() {
-    this.getInfo()
+    console.log('111', axios.defaults)
+    console.log('222', process.env)
+    this.getContacts()
   },
   computed: {
     canCreate() {
@@ -80,17 +97,25 @@ export default {
     },
   },
   methods: {
-    async getInfo() {
+    async getContacts() {
       // TODO: настроить заголовки по умолчанию, чтобы не передавать постоянно
       const headers = {
         'Content-Type': 'application/json',
         Accept: 'application/json',
       }
-      const response = await axios.get(this.url, {
-        headers: headers,
-      })
-      // TODO: оставил как пример без .then .catch
-      this.contacts = response.data
+      try {
+        const response = await axios.get(this.url, {
+          headers: headers,
+        })
+        // TODO: оставил как пример без .then .catch
+        console.log('getCont', response)
+        this.contacts = response.data.contact
+        this.error = false
+      } catch (error) {
+        console.log('ERROR', error)
+        this.message = error.message
+        this.error = true
+      }
     },
     async createContact() {
       const data = {
@@ -103,36 +128,43 @@ export default {
       }
       await axios
         .post(this.url, data, { headers: headers })
-        .then((response) => {
-          this.contacts = response.data
-        })
+        .then(
+          // console.log('RESP', response.data)
+          // this.contacts = response.data
+          this.getContacts()
+        )
         .catch((error) => {
           console.log(error)
         })
-      // this.form.name = this.form.value = '' // потом включить для очистки
+      this.form.name = this.form.value = ''
+      this.getContacts()
     },
     async removeContact(id) {
       await axios
         .delete(this.url + id)
         .then((response) => {
-          this.contacts = response.data.contacts
+          console.log('REMOVE', response)
+          // this.contacts = response.data.contacts
+          this.getContacts()
         })
         .catch((error) => {
           console.log(error)
         })
     },
-    async markContact(id) {
-      const contact = this.contacts.find((c) => c.id === id)
-      // TODO: в данном случае так проще обновлять клиента
-      console.log(contact)
-      const update = await axios.put(
-        `http://localhost:5000/api/contacts/${id}`,
-        {
-          ...contact,
-          marked: true,
-        }
-      )
-      contact.marked = update.data.contacts.marked
+    async markContact(contact) {
+      console.log('CON', contact)
+      await axios
+        .put(this.url + contact.id, {
+          marked: !contact.marked,
+        })
+        .then((response) => {
+          console.log('MARK', response)
+          // this.contacts = response.data.contacts
+          this.getContacts()
+        })
+        .catch((error) => {
+          console.log(error)
+        })
     },
   },
 }

@@ -1,21 +1,18 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./static/logo.png" />
-    <FirstPage />
+    <Menu />
+    <router-view/>
   </div>
 </template>
 
 <script>
-import FirstPage from './components/FirstPage.vue'
+import Menu from './components/Menu.vue'
 
 export default {
   name: 'App',
-  components: {
-    FirstPage,
-  },
+  components: { Menu }
 }
 </script>
-
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
