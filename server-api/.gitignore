@@ -92,3 +92,5 @@ sw.*
 package-lock.json
 
 ecosystem.config.js
+
+.vscode
